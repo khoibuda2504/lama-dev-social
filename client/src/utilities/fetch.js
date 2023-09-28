@@ -22,9 +22,14 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   response => response,
   error => {
-    if (error.response.status === 401 || error.response.status === 403) {
+    if (error.response.status === 401) {
       localStorage.setItem('user', null)
       return window.location.href = '/login'
+    }
+    if (error.response.status === 403) {
+      const { refreshToken } = getFromLS("user");
+      console.log('refreshToken:::::', refreshToken)
+      instance.post('/refresh', { refreshToken })
     }
     return Promise.reject(error);
   });

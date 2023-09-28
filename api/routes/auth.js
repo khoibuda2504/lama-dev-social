@@ -42,9 +42,13 @@ router.post("/login", async (req, res) => {
     const accessToken = jwt.sign({ user }, process.env.JWT_ACCESS_TOKEN, {
       expiresIn: '5s'
     })
+    const refreshToken = jwt.sign({ user }, process.env.JWT_REFRESH_TOKEN, {
+      expiresIn: '10s'
+    })
     res.status(200).json({
       ...user._doc,
-      accessToken
+      accessToken,
+      refreshToken
     })
   } catch (err) {
     res.status(500).json(err)
