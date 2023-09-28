@@ -10,6 +10,9 @@ export const LoginSuccess = (user) => ({
 export const LoginFailure = () => ({
   type: "LOGIN_FAILURE",
 });
+export const Logout = () => ({
+  type: "LOG_OUT",
+});
 
 export const Follow = (userId) => ({
   type: "FOLLOW",

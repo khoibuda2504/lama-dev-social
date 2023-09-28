@@ -1,4 +1,4 @@
-import axios from "axios";
+import {axios} from 'utilities'
 import { useRef, useState } from "react";
 import "./register.css";
 import { useHistory } from "react-router";
@@ -21,11 +21,11 @@ export default function Register() {
         password: password.current.value,
       };
       try {
-        const hehe = await axios.post("/auth/register", user);
+        await axios.post("/auth/register", user);
         history.push("/login");
       } catch (err) {
-        if (err?.response?.data?.message) {
-          setErrMsg(err.response.data.message)
+        if (err?.response?.data) {
+          setErrMsg(err.response.data)
         }
       }
     }
@@ -35,10 +35,10 @@ export default function Register() {
     <div className="login">
       <div className="loginWrapper">
         <div className="loginLeft">
-          {/* <h3 className="loginLogo">Lamasocial</h3>
+          <h3 className="loginLogo">Social</h3>
           <span className="loginDesc">
-            Connect with friends and the world around you on Lamasocial.
-          </span> */}
+            Connect with friends and the world around you on Social.
+          </span>
         </div>
         <div className="loginRight">
           {errMsg &&
@@ -78,7 +78,7 @@ export default function Register() {
             <button className="loginButton" type="submit">
               Sign Up
             </button>
-            <button className="loginRegisterButton">Log into Account</button>
+            <button className="loginRegisterButton" onClick={() => history.push("/login")}>Log into Account</button>
           </form>
         </div>
       </div>

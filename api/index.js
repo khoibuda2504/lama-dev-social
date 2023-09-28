@@ -8,16 +8,16 @@ const multer = require("multer");
 const userRoute = require("./routes/users");
 const authRoute = require("./routes/auth");
 const postRoute = require("./routes/posts");
+const conversationRoute = require("./routes/conversations");
+const messageRoute = require("./routes/messages");
 const path = require("path");
+const verifyJWT = require("./middlewares/verifyJWT");
 
 dotenv.config();
 
 mongoose.connect(
   process.env.MONGO_URL,
-  { useNewUrlParser: true, useUnifiedTopology: true },
-  () => {
-    console.log("Connected to MongoDB");
-  }
+  { useNewUrlParser: true, useUnifiedTopology: true }
 );
 app.use("/images", express.static(path.join(__dirname, "public/images")));
 
@@ -45,8 +45,11 @@ app.post("/api/upload", upload.single("file"), (req, res) => {
 });
 
 app.use("/api/auth", authRoute);
+app.use(verifyJWT)
 app.use("/api/users", userRoute);
 app.use("/api/posts", postRoute);
+app.use("/api/conversation", conversationRoute);
+app.use("/api/message", messageRoute);
 
 app.listen(8800, () => {
   console.log("Backend server is running!");

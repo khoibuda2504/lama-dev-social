@@ -119,4 +119,10 @@ router.put("/:id/unfollow", async (req, res) => {
   }
 });
 
+//get all users 
+
+router.get('/all', async (req, res) => {
+  const users = await User.find();
+  res.status(200).json(users);
+})
 module.exports = router;
