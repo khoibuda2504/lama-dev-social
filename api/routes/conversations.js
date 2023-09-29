@@ -29,11 +29,38 @@ router.get('/:userId', async (req, res) => {
 //get conversation of online chat
 router.get('/find/:senderId/:receiverId', async (req, res) => {
   try {
-    console.log('[req.params.senderId,req.params.receiverId]', [req.params.senderId,req.params.receiverId])
     const conversation = await Conversation.find({
-      members: { $all: [req.params.senderId,req.params.receiverId] }
+      members: { $all: [req.params.senderId, req.params.receiverId] }
     })
     res.status(200).json(conversation)
+  } catch (err) {
+    res.status(500).json(err)
+  }
+})
+
+router.post('/create/:userId', async (req, res) => {
+  try {
+    const conversations = await Conversation.find({
+      members: { $all: [req.userId, req.params.userId] }
+    })
+    if (!!conversations.length) {
+      return res.status(200).json({
+        isCreated: false,
+        conversation: conversations[0]
+      })
+    }
+  } catch (err) {
+    res.status(500).json(err)
+  }
+  try {
+    const newConversation = new Conversation({
+      members: [req.userId, req.params.userId]
+    })
+    const savedConversation = await newConversation.save();
+    res.status(200).json({
+      isCreated: false,
+      conversation: savedConversation
+    })
   } catch (err) {
     res.status(500).json(err)
   }

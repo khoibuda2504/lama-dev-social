@@ -1,19 +1,24 @@
-import { useEffect, useState } from 'react'
 import './startConversation.css'
-import {axios} from "utilities"
+import { axios, handleImg } from "utilities"
+import useSWR from 'swr'
+import { fetcher } from 'utilities/swr'
 
-export default function StartConversation({ isAddNew, setIsAddNew }) {
-  const [users, setUsers] = useState([])
-  useEffect(() => {
-    (async () => {
-     try {
-      const res = await axios.get("/users/all")
-      setUsers(res?.data)
-     } catch (error) {
+export default function StartConversation({ isAddNew, setIsAddNew, setCurrentChat, setConversations }) {
+  const { data: users } = useSWR(isAddNew ? '/users/all' : null, fetcher)
+  const handleCreateConversation = async userId => {
+    try {
+      const res = await axios.post(`/conversation/create/${userId}`)
+      if (res.isCreated) {
+        setCurrentChat(res.conversation)
+      } else {
+        setConversations(prev => [...prev, res.conversation])
+        setCurrentChat(res.conversation)
+      }
+      setIsAddNew(false)
+    } catch (error) {
       console.log(error)
-     }
-    })()
-  }, []) 
+    }
+  }
   return (
     <div className="startConversationWrapper">
       <div className="startConversation" onClick={() => setIsAddNew(prev => !prev)}>
@@ -21,7 +26,14 @@ export default function StartConversation({ isAddNew, setIsAddNew }) {
       </div>
       {isAddNew &&
         <div className="startConversationDropdown">
-          hehe
+          {users?.map(user => (
+            <div className="conversation" key={user._id} onClick={() => handleCreateConversation(user._id)}>
+              <img className="conversationImg"
+                src={handleImg(user?.profilePicture)}
+                alt="avt" />
+              <span className="conversationName">{user?.username} {user?.online}</span>
+            </div>
+          ))}
         </div>
       }
     </div>

@@ -22,8 +22,8 @@ export default function Messenger() {
   const scrollRef = useRef()
   const history = useHistory();
   useEffect(() => {
-    socket.current = io("ws://localhost:8900")
-    socket.current.on("getMessage", data => {
+    // socket.current = io("ws://localhost:8900")
+    socket?.current?.on("getMessage", data => {
       setMessages(prev => [...prev, {
         sender: data.senderId,
         text: data.text,
@@ -32,14 +32,14 @@ export default function Messenger() {
     })
   }, [])
   useEffect(() => {
-    socket.current.emit("addUser", user._id)
+    socket?.current?.emit("addUser", user._id)
   }, [user])
 
   useEffect(() => {
     const getConversations = async () => {
       try {
         const res = await axios.get("/conversation/" + user._id)
-        setConversations(res.data)
+        setConversations(res)
       } catch (err) {
         console.log(err)
       }
@@ -51,7 +51,7 @@ export default function Messenger() {
     const getMessages = async () => {
       try {
         const res = await axios.get("/message/" + currentChat?._id)
-        setMessages(res.data)
+        setMessages(res)
       } catch (err) {
         console.log(err)
       }
@@ -66,7 +66,7 @@ export default function Messenger() {
       text: newMessage
     }
     const receiverId = currentChat.members.find(member => member !== user._id)
-    socket.current.emit("sendMessage", {
+    socket?.current?.emit("sendMessage", {
       senderId: user._id,
       receiverId,
       text: newMessage
@@ -82,6 +82,7 @@ export default function Messenger() {
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages?.length]);
+  console.log('currentChat:::::', currentChat)
   return (
     <>
       <div className="messenger">
@@ -103,7 +104,7 @@ export default function Messenger() {
               </div>
             </div>
             <input type="text" placeholder="🔍 Search for friends" className="chatMenuInput" />
-            <StartConversation isAddNew={isAddNew} setIsAddNew={setIsAddNew} />
+            <StartConversation setConversations={setConversations} isAddNew={isAddNew} setIsAddNew={setIsAddNew} setCurrentChat={setCurrentChat}/>
             {conversations.map(c => (
               <div key={c._id} onClick={() => setCurrentChat(c)}>
                 <Conversation currentChatId={currentChat?._id} conversation={c} currentUser={user} />

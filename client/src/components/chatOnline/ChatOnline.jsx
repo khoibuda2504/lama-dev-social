@@ -8,8 +8,8 @@ export default function ChatOnline({ currentId, setCurrentChat }) {
   const socket = useRef()
   const PF = process.env.REACT_APP_PUBLIC_FOLDER;
   useEffect(() => {
-    socket.current = io("ws://localhost:8900")
-    socket.current.on("getUsers", async (users) => {
+    // socket.current = io("ws://localhost:8900")
+    socket?.current?.on("getUsers", async (users) => {
       const res = await Promise.all(users.map(u => {
         return axios.get(`/users?userId=${u.userId}`);
       }))

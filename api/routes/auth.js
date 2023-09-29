@@ -40,10 +40,10 @@ router.post("/login", async (req, res) => {
       return res.status(400).json("wrong password")
     }
     const accessToken = jwt.sign({ user }, process.env.JWT_ACCESS_TOKEN, {
-      expiresIn: '5s'
+      expiresIn: '30m'
     })
     const refreshToken = jwt.sign({ user }, process.env.JWT_REFRESH_TOKEN, {
-      expiresIn: '10s'
+      expiresIn: '4h'
     })
     res.status(200).json({
       ...user._doc,
