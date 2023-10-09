@@ -21,6 +21,20 @@
 .conversationName {
   font-weight: 500;
 }
+.conversation:hover svg {
+  opacity: 1;
+  visibility: visible;
+}
+.conversation svg {
+  margin-left: auto;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  visibility: hidden;
+}
+.conversation svg:hover {
+  color: red;
+}
 
 @media screen and (max-width: 768px) {
   .conversationName {

@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from "react"
 import "./conversation.css"
-import { io } from 'socket.io-client'
-import { handleImg, axios } from 'utilities'
+import { handleImg, axios,removeUnicode } from 'utilities'
+import DeleteIcon from '@material-ui/icons/Delete';
 
-export default function Conversation({ conversation, currentUser, currentChatId }) {
+export default function Conversation({ search, conversation, currentUser, currentChatId, handleDeleteConversation }) {
   const [user, setUser] = useState(null)
   const socket = useRef()
   useEffect(() => {
-    // socket.current = io("ws://localhost:8900")
     socket?.current?.on("getUsers", async (users) => {
       const usersId = users.map(user => user.userId)
       if (usersId.includes(user?._id)) {
@@ -28,12 +27,16 @@ export default function Conversation({ conversation, currentUser, currentChatId 
     }
     getUser()
   }, [conversation?.members, currentUser?._id])
+  if (!removeUnicode(user?.username)?.includes(search)) {
+    return null
+  }
   return (
     <div className={`conversation ${currentChatId === conversation?._id ? "selected" : ''} `}>
       <img className="conversationImg"
         src={handleImg(user?.profilePicture)}
         alt="avt" />
       <span className="conversationName">{user?.username} {user?.online}</span>
+      <DeleteIcon onClick={() => handleDeleteConversation(conversation?._id)} />
     </div>
   )
 }

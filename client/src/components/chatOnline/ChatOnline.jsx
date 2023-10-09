@@ -1,7 +1,6 @@
 import {axios} from 'utilities'
 import { useEffect, useRef, useState } from "react";
 import "./chatOnline.css";
-import { io } from 'socket.io-client'
 
 export default function ChatOnline({ currentId, setCurrentChat }) {
   const [onlineFriends, setOnlineFriends] = useState([]);

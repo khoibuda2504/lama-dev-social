@@ -3,7 +3,6 @@ import Conversation from "components/conversation/Conversation"
 import Message from "components/message/Messsage"
 import "./messenger.css"
 import { AuthContext } from "context/AuthContext"
-import { io } from 'socket.io-client'
 import { handleImg, axios } from "utilities"
 import { Logout } from "context/AuthActions"
 import { useHistory } from "react-router";
@@ -22,7 +21,6 @@ export default function Messenger() {
   const scrollRef = useRef()
   const history = useHistory();
   useEffect(() => {
-    // socket.current = io("ws://localhost:8900")
     socket?.current?.on("getMessage", data => {
       setMessages(prev => [...prev, {
         sender: data.senderId,
@@ -73,7 +71,7 @@ export default function Messenger() {
     })
     try {
       const res = await axios.post("/message", message)
-      setMessages(prev => [...prev, res.data])
+      setMessages(prev => [...prev, res])
       setNewMessage("")
     } catch (err) {
       console.log(err)
@@ -82,7 +80,17 @@ export default function Messenger() {
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages?.length]);
-  console.log('currentChat:::::', currentChat)
+  const inputRef = useRef()
+  const handleDeleteConversation = async (id) => {
+    try {
+      await axios.delete(`/conversation/${id}`)
+      setConversations(prev => prev.filter(c => c._id !== id))
+      setMessages([])
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  const [search, setSearch] = useState('')
   return (
     <>
       <div className="messenger">
@@ -103,11 +111,15 @@ export default function Messenger() {
                 <ExitToApp />
               </div>
             </div>
-            <input type="text" placeholder="🔍 Search for friends" className="chatMenuInput" />
-            <StartConversation setConversations={setConversations} isAddNew={isAddNew} setIsAddNew={setIsAddNew} setCurrentChat={setCurrentChat}/>
+            <input value={search} onChange={e => setSearch(e.target.value)} type="text" placeholder="🔍 Search for friends" className="chatMenuInput" />
+            <StartConversation search={search}  inputRef={inputRef} setConversations={setConversations} isAddNew={isAddNew} setIsAddNew={setIsAddNew} setCurrentChat={setCurrentChat} />
             {conversations.map(c => (
-              <div key={c._id} onClick={() => setCurrentChat(c)}>
-                <Conversation currentChatId={currentChat?._id} conversation={c} currentUser={user} />
+              <div key={c._id} onClick={() => {
+                setSearch('')
+                setCurrentChat(c)
+                inputRef.current?.focus()
+              }}>
+                <Conversation search={search} handleDeleteConversation={handleDeleteConversation} currentChatId={currentChat?._id} conversation={c} currentUser={user} />
               </div>
             ))}
           </div>
@@ -118,7 +130,7 @@ export default function Messenger() {
               <div className="chatBoxTop">
                 {messages.map(m => (
                   <div key={m._id} ref={scrollRef}>
-                    <Message message={m} own={m.sender === user._id} />
+                    <Message message={m} own={m?.sender === user?._id} />
                   </div>
                 ))}
               </div>
@@ -126,7 +138,13 @@ export default function Messenger() {
                 <textarea
                   className="chatMessageInput" placeholder="write something..."
                   onChange={e => setNewMessage(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === "NumpadEnter") {
+                      handleSubmit(e)
+                    }
+                  }}
                   value={newMessage}
+                  ref={inputRef}
                 >
                 </textarea>
                 <button className="chatSubmitButton" onClick={handleSubmit}>Send</button>

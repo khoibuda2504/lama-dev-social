@@ -49,9 +49,10 @@
 }
 
 .chatMessageInput {
-  width: 80%;
+  width: 92%;
   height: 90px;
   padding: 10px;
+  resize: none;
 }
 
 .chatSubmitButton {

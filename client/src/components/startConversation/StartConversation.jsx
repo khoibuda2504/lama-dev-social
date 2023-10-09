@@ -1,9 +1,9 @@
 import './startConversation.css'
-import { axios, handleImg } from "utilities"
+import { axios, handleImg, removeUnicode } from "utilities"
 import useSWR from 'swr'
 import { fetcher } from 'utilities/swr'
 
-export default function StartConversation({ isAddNew, setIsAddNew, setCurrentChat, setConversations }) {
+export default function StartConversation({ search, isAddNew, setIsAddNew, setCurrentChat, setConversations, inputRef }) {
   const { data: users } = useSWR(isAddNew ? '/users/all' : null, fetcher)
   const handleCreateConversation = async userId => {
     try {
@@ -15,6 +15,7 @@ export default function StartConversation({ isAddNew, setIsAddNew, setCurrentCha
         setCurrentChat(res.conversation)
       }
       setIsAddNew(false)
+      inputRef.current.focus()
     } catch (error) {
       console.log(error)
     }
@@ -27,12 +28,13 @@ export default function StartConversation({ isAddNew, setIsAddNew, setCurrentCha
       {isAddNew &&
         <div className="startConversationDropdown">
           {users?.map(user => (
-            <div className="conversation" key={user._id} onClick={() => handleCreateConversation(user._id)}>
-              <img className="conversationImg"
-                src={handleImg(user?.profilePicture)}
-                alt="avt" />
-              <span className="conversationName">{user?.username} {user?.online}</span>
-            </div>
+            !removeUnicode(user?.username)?.includes(search) ? null :
+              <div className="conversation" key={user._id} onClick={() => handleCreateConversation(user._id)}>
+                <img className="conversationImg"
+                  src={handleImg(user?.profilePicture)}
+                  alt="avt" />
+                <span className="conversationName">{user?.username} {user?.online}</span>
+              </div>
           ))}
         </div>
       }

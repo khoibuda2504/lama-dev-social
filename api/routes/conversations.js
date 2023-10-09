@@ -45,7 +45,7 @@ router.post('/create/:userId', async (req, res) => {
     })
     if (!!conversations.length) {
       return res.status(200).json({
-        isCreated: false,
+        isCreated: true,
         conversation: conversations[0]
       })
     }
@@ -65,4 +65,14 @@ router.post('/create/:userId', async (req, res) => {
     res.status(500).json(err)
   }
 })
+
+router.delete('/:conversationId', async (req, res) => {
+  try {
+    const deletedConversation = await Conversation.findByIdAndDelete(req.params.conversationId)
+    res.status(200).json(deletedConversation)
+  } catch (err) {
+    res.status(500).json(err)
+  }
+})
+
 module.exports = router;
