@@ -1,14 +1,14 @@
 import {axios} from 'utilities'
 import { useEffect, useRef, useState } from "react";
 import "./chatOnline.css";
+import { useSocket } from 'context/SocketContext';
 
 export default function ChatOnline({ currentId, setCurrentChat }) {
   const [onlineFriends, setOnlineFriends] = useState([]);
-  const socket = useRef()
+  const socket = useSocket()
   const PF = process.env.REACT_APP_PUBLIC_FOLDER;
   useEffect(() => {
-    // socket.current = io("ws://localhost:8900")
-    socket?.current?.on("getUsers", async (users) => {
+    socket?.on("getUsers", async (users) => {
       const res = await Promise.all(users.map(u => {
         return axios.get(`/users?userId=${u.userId}`);
       }))

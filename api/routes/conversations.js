@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const Conversation = require("../models/Conversation");
+const Message = require("../models/Message");
 
 //new conversation
 router.post('/', async (req, res) => {
@@ -16,6 +17,7 @@ router.post('/', async (req, res) => {
 
 //get conversation of user
 router.get('/:userId', async (req, res) => {
+  console.log('req:::::', req)
   try {
     const conversation = await Conversation.find({
       members: { $in: [req.params.userId] }
@@ -69,6 +71,9 @@ router.post('/create/:userId', async (req, res) => {
 router.delete('/:conversationId', async (req, res) => {
   try {
     const deletedConversation = await Conversation.findByIdAndDelete(req.params.conversationId)
+    await Message.deleteMany({
+      conversationId: req.params.conversationId
+    })
     res.status(200).json(deletedConversation)
   } catch (err) {
     res.status(500).json(err)

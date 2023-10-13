@@ -8,6 +8,7 @@ import { Logout } from "context/AuthActions"
 import { useHistory } from "react-router";
 import { ExitToApp } from '@material-ui/icons';
 import StartConversation from "components/startConversation/StartConversation"
+import { useSocket } from "context/SocketContext"
 
 
 export default function Messenger() {
@@ -16,21 +17,17 @@ export default function Messenger() {
   const [messages, setMessages] = useState([])
   const [newMessage, setNewMessage] = useState("")
   const [isAddNew, setIsAddNew] = useState(false)
-  const socket = useRef()
+  const socket = useSocket()
   const { user, dispatch } = useContext(AuthContext)
   const scrollRef = useRef()
   const history = useHistory();
   useEffect(() => {
-    socket?.current?.on("getMessage", data => {
-      setMessages(prev => [...prev, {
-        sender: data.senderId,
-        text: data.text,
-        createdAt: Date.now()
-      }])
+    socket?.on("getMessage", data => {
+      setMessages(prev => [...prev, data])
     })
   }, [])
   useEffect(() => {
-    socket?.current?.emit("addUser", user._id)
+    socket.emit("addUser", user._id)
   }, [user])
 
   useEffect(() => {
@@ -64,13 +61,10 @@ export default function Messenger() {
       text: newMessage
     }
     const receiverId = currentChat.members.find(member => member !== user._id)
-    socket?.current?.emit("sendMessage", {
-      senderId: user._id,
-      receiverId,
-      text: newMessage
-    })
+
     try {
       const res = await axios.post("/message", message)
+      socket.emit("sendMessage", { ...res, receiverId })
       setMessages(prev => [...prev, res])
       setNewMessage("")
     } catch (err) {
@@ -112,7 +106,7 @@ export default function Messenger() {
               </div>
             </div>
             <input value={search} onChange={e => setSearch(e.target.value)} type="text" placeholder="🔍 Search for friends" className="chatMenuInput" />
-            <StartConversation search={search}  inputRef={inputRef} setConversations={setConversations} isAddNew={isAddNew} setIsAddNew={setIsAddNew} setCurrentChat={setCurrentChat} />
+            <StartConversation search={search} inputRef={inputRef} setConversations={setConversations} isAddNew={isAddNew} setIsAddNew={setIsAddNew} setCurrentChat={setCurrentChat} />
             {conversations.map(c => (
               <div key={c._id} onClick={() => {
                 setSearch('')
@@ -130,7 +124,7 @@ export default function Messenger() {
               <div className="chatBoxTop">
                 {messages.map(m => (
                   <div key={m._id} ref={scrollRef}>
-                    <Message message={m} own={m?.sender === user?._id} />
+                    <Message message={m} own={m?.sender?._id === user?._id} />
                   </div>
                 ))}
               </div>
